@@ -18,39 +18,49 @@ export class HandTrackingService {
     ): Promise<void> {
         this.onResultsCallback = onResults;
 
-        // Initialize Hands
-        this.hands = new Hands({
-            locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-            },
-        });
+        try {
+            console.log('Initializing MediaPipe Hands...');
+            // Initialize Hands
+            this.hands = new Hands({
+                locateFile: (file) => {
+                    const url = `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                    console.log(`Loading MediaPipe file: ${file} from ${url}`);
+                    return url;
+                },
+            });
 
-        this.hands.setOptions({
-            maxNumHands: 2,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.7,
-            minTrackingConfidence: 0.5,
-        });
+            this.hands.setOptions({
+                maxNumHands: 2,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.7,
+                minTrackingConfidence: 0.5,
+            });
 
-        this.hands.onResults((results: Results) => {
-            if (this.onResultsCallback) {
-                this.onResultsCallback(results);
-            }
-        });
-
-        // Initialize camera
-        this.camera = new Camera(videoElement, {
-            onFrame: async () => {
-                if (this.hands) {
-                    await this.hands.send({ image: videoElement });
+            this.hands.onResults((results: Results) => {
+                if (this.onResultsCallback) {
+                    this.onResultsCallback(results);
                 }
-            },
-            width: 1280,
-            height: 720,
-        });
+            });
 
-        await this.camera.start();
-        console.log('Hand tracking initialized');
+            console.log('Initializing Camera...');
+            // Initialize camera
+            this.camera = new Camera(videoElement, {
+                onFrame: async () => {
+                    if (this.hands) {
+                        await this.hands.send({ image: videoElement });
+                    }
+                },
+                width: 1280,
+                height: 720,
+            });
+
+            console.log('Starting Camera...');
+            await this.camera.start();
+            console.log('Hand tracking initialized successfully');
+        } catch (error) {
+            console.error('Error in HandTrackingService.initialize:', error);
+            throw error;
+        }
     }
 
     /**

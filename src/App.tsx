@@ -7,6 +7,7 @@ function App() {
     const {
         videoRef,
         isTracking,
+        isLoading,
         fps,
         activeNotes,
         lastResults,
@@ -35,6 +36,7 @@ function App() {
             {/* Control panel */}
             <ControlPanel
                 isTracking={isTracking}
+                isLoading={isLoading}
                 onStart={startTracking}
                 onStop={stopTracking}
             />

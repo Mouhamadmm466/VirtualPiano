@@ -9,6 +9,7 @@ import { audioEngine } from '../services/AudioEngine';
  */
 export function useHandTracking() {
     const [isTracking, setIsTracking] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [fps, setFps] = useState(0);
     const [activeNotes, setActiveNotes] = useState<string[]>([]);
     const [lastResults, setLastResults] = useState<Results | null>(null);
@@ -22,22 +23,33 @@ export function useHandTracking() {
      * Start hand tracking
      */
     const startTracking = async () => {
-        if (!videoRef.current || isTracking) return;
+        if (!videoRef.current || isTracking || isLoading) return;
+
+        setIsLoading(true);
+        console.log('Starting hand tracking initialization...');
 
         try {
             // Initialize audio engine
+            console.log('Initializing audio engine...');
             await audioEngine.initialize();
+            console.log('Audio engine initialized successfully');
 
             // Initialize hand tracking
+            console.log('Initializing hand tracking service...');
             handTrackingRef.current = new HandTrackingService();
             await handTrackingRef.current.initialize(
                 videoRef.current,
                 handleResults
             );
+            console.log('Hand tracking service initialized successfully');
 
             setIsTracking(true);
         } catch (error) {
             console.error('Failed to start tracking:', error);
+            // Reset state on failure
+            stopTracking();
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -97,6 +109,7 @@ export function useHandTracking() {
     return {
         videoRef,
         isTracking,
+        isLoading,
         fps,
         activeNotes,
         lastResults,

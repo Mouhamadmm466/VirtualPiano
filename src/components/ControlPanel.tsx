@@ -2,6 +2,7 @@ import { cn } from '../lib/utils';
 
 interface ControlPanelProps {
     isTracking: boolean;
+    isLoading: boolean;
     onStart: () => void;
     onStop: () => void;
 }
@@ -9,7 +10,7 @@ interface ControlPanelProps {
 /**
  * Control panel for starting/stopping the piano
  */
-export function ControlPanel({ isTracking, onStart, onStop }: ControlPanelProps) {
+export function ControlPanel({ isTracking, isLoading, onStart, onStop }: ControlPanelProps) {
     return (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
             {!isTracking && (
@@ -22,15 +23,23 @@ export function ControlPanel({ isTracking, onStart, onStop }: ControlPanelProps)
                     </p>
                     <button
                         onClick={onStart}
+                        disabled={isLoading}
                         className={cn(
-                            "px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300",
+                            "px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 min-w-[200px]",
                             "bg-gradient-to-r from-neon-blue to-neon-purple",
                             "hover:shadow-[0_0_30px_rgba(0,240,255,0.5)]",
-                            "active:scale-95",
-                            "font-['Orbitron']"
+                            "active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
+                            "font-['Orbitron'] flex items-center justify-center gap-3 mx-auto"
                         )}
                     >
-                        🎹 Start Playing
+                        {isLoading ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Initializing...
+                            </>
+                        ) : (
+                            <>🎹 Start Playing</>
+                        )}
                     </button>
                 </div>
             )}
