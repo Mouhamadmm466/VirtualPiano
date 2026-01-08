@@ -20,22 +20,28 @@ export class HandTrackingService {
 
         try {
             console.log('Initializing MediaPipe Hands...');
-            // Initialize Hands
-            this.hands = new Hands({
-                locateFile: (file) => {
-                    const url = `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-                    return url;
+            // Initialize Hands with defensive check for constructor
+            const HandsConstructor = (Hands as any).Hands || Hands;
+            if (typeof HandsConstructor !== 'function') {
+                throw new Error('MediaPipe Hands constructor not found. Check if the library is loaded correctly.');
+            }
+
+            const handsInstance = new HandsConstructor({
+                locateFile: (file: string) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
                 },
             });
 
-            this.hands.setOptions({
+            this.hands = handsInstance;
+
+            handsInstance.setOptions({
                 maxNumHands: 2,
                 modelComplexity: 1,
                 minDetectionConfidence: 0.7,
                 minTrackingConfidence: 0.5,
             });
 
-            this.hands.onResults((results: Results) => {
+            handsInstance.onResults((results: Results) => {
                 if (this.onResultsCallback) {
                     this.onResultsCallback(results);
                 }
