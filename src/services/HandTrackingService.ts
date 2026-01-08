@@ -20,12 +20,23 @@ export class HandTrackingService {
 
         try {
             console.log('Initializing MediaPipe Hands...');
-            // Initialize Hands with defensive check for constructor
-            const HandsConstructor = (Hands as any).Hands || Hands;
+
+            // Robust lookup for the Hands constructor
+            // 1. Check named import (Hands)
+            // 2. Check default import ((Hands as any).Hands)
+            // 3. Check global window object (window.Hands)
+            const HandsConstructor = (Hands as any)?.Hands || Hands || (window as any).Hands;
+
             if (typeof HandsConstructor !== 'function') {
-                throw new Error('MediaPipe Hands constructor not found. Check if the library is loaded correctly.');
+                console.error('Hands constructor lookup failed:', {
+                    HandsImport: Hands,
+                    HandsAsAny: (Hands as any)?.Hands,
+                    WindowHands: (window as any).Hands
+                });
+                throw new Error('MediaPipe Hands constructor not found. Please ensure the library is loaded correctly.');
             }
 
+            console.log('Found Hands constructor, creating instance...');
             const handsInstance = new HandsConstructor({
                 locateFile: (file: string) => {
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
