@@ -12,7 +12,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
-[Live Demo](https://your-deployment-url.vercel.app) · [Report Bug](https://github.com/yourusername/virtual-piano/issues) · [Request Feature](https://github.com/yourusername/virtual-piano/issues)
+[Live Demo](https://your-deployment-url.vercel.app) · [Report Bug](https://github.com/Mouhamadmm466/VirtualPiano/issues) · [Request Feature](https://github.com/Mouhamadmm466/VirtualPiano/issues)
 
 </div>
 
@@ -266,9 +266,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-**Your Name** - [@yourtwitter](https://twitter.com/yourtwitter) - your.email@example.com
+**Mouhamad** - GitHub: [@Mouhamadmm466](https://github.com/Mouhamadmm466)
 
-Project Link: [https://github.com/yourusername/virtual-piano](https://github.com/yourusername/virtual-piano)
+Project Link: [https://github.com/Mouhamadmm466/VirtualPiano](https://github.com/Mouhamadmm466/VirtualPiano)
 
 ---
 
