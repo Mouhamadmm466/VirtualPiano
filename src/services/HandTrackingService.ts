@@ -24,7 +24,6 @@ export class HandTrackingService {
             this.hands = new Hands({
                 locateFile: (file) => {
                     const url = `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-                    console.log(`Loading MediaPipe file: ${file} from ${url}`);
                     return url;
                 },
             });
@@ -42,20 +41,22 @@ export class HandTrackingService {
                 }
             });
 
-            console.log('Initializing Camera...');
-            // Initialize camera
-            this.camera = new Camera(videoElement, {
-                onFrame: async () => {
-                    if (this.hands) {
-                        await this.hands.send({ image: videoElement });
+            // Use a requestAnimationFrame loop instead of the Camera helper for more control
+            const processFrame = async () => {
+                if (!this.hands || !videoElement.paused && !videoElement.ended) {
+                    try {
+                        await this.hands?.send({ image: videoElement });
+                    } catch (err) {
+                        console.error('Error processing frame:', err);
                     }
-                },
-                width: 1280,
-                height: 720,
-            });
+                }
+                if (this.hands) {
+                    requestAnimationFrame(processFrame);
+                }
+            };
 
-            console.log('Starting Camera...');
-            await this.camera.start();
+            console.log('Starting frame processing loop...');
+            requestAnimationFrame(processFrame);
             console.log('Hand tracking initialized successfully');
         } catch (error) {
             console.error('Error in HandTrackingService.initialize:', error);

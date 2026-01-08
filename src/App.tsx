@@ -8,6 +8,7 @@ function App() {
         videoRef,
         isTracking,
         isLoading,
+        error,
         fps,
         activeNotes,
         lastResults,
@@ -20,7 +21,7 @@ function App() {
             {/* Video element (hidden, used for MediaPipe) */}
             <video
                 ref={videoRef}
-                className="absolute top-0 left-0 w-full h-full object-cover"
+                className="absolute top-0 left-0 w-full h-full object-cover z-0"
                 style={{ transform: 'scaleX(-1)' }} // Mirror for natural interaction
                 autoPlay
                 playsInline
@@ -37,6 +38,7 @@ function App() {
             <ControlPanel
                 isTracking={isTracking}
                 isLoading={isLoading}
+                error={error}
                 onStart={startTracking}
                 onStop={stopTracking}
             />

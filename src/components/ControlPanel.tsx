@@ -3,6 +3,7 @@ import { cn } from '../lib/utils';
 interface ControlPanelProps {
     isTracking: boolean;
     isLoading: boolean;
+    error: string | null;
     onStart: () => void;
     onStop: () => void;
 }
@@ -10,9 +11,9 @@ interface ControlPanelProps {
 /**
  * Control panel for starting/stopping the piano
  */
-export function ControlPanel({ isTracking, isLoading, onStart, onStop }: ControlPanelProps) {
+export function ControlPanel({ isTracking, isLoading, error, onStart, onStop }: ControlPanelProps) {
     return (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto z-50">
             {!isTracking && (
                 <div className="text-center">
                     <h1 className="text-6xl font-bold font-['Orbitron'] text-glow text-neon-blue mb-4">
@@ -21,6 +22,14 @@ export function ControlPanel({ isTracking, isLoading, onStart, onStop }: Control
                     <p className="text-gray-400 mb-8 max-w-md mx-auto">
                         Play piano notes using your hands. Tap your fingers in the air to create music.
                     </p>
+
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm max-w-md mx-auto">
+                            <p className="font-bold mb-1">Initialization Error</p>
+                            <p>{error}</p>
+                        </div>
+                    )}
+
                     <button
                         onClick={onStart}
                         disabled={isLoading}

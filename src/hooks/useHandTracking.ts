@@ -10,6 +10,7 @@ import { audioEngine } from '../services/AudioEngine';
 export function useHandTracking() {
     const [isTracking, setIsTracking] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [fps, setFps] = useState(0);
     const [activeNotes, setActiveNotes] = useState<string[]>([]);
     const [lastResults, setLastResults] = useState<Results | null>(null);
@@ -26,15 +27,45 @@ export function useHandTracking() {
         if (!videoRef.current || isTracking || isLoading) return;
 
         setIsLoading(true);
+        setError(null);
         console.log('Starting hand tracking initialization...');
 
+        const initTimeout = setTimeout(() => {
+            if (isLoading) {
+                setError('Initialization timed out. Please check your camera permissions and refresh.');
+                stopTracking();
+            }
+        }, 15000); // 15 second timeout
+
         try {
-            // Initialize audio engine
+            // 1. Initialize audio engine
             console.log('Initializing audio engine...');
             await audioEngine.initialize();
             console.log('Audio engine initialized successfully');
 
-            // Initialize hand tracking
+            // 2. Request camera access manually to ensure it's active
+            console.log('Requesting camera access...');
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
+                }
+            });
+
+            videoRef.current.srcObject = stream;
+
+            // Wait for video to be ready
+            await new Promise<void>((resolve) => {
+                if (!videoRef.current) return;
+                videoRef.current.onloadedmetadata = () => {
+                    videoRef.current?.play();
+                    resolve();
+                };
+            });
+            console.log('Camera stream active and video playing');
+
+            // 3. Initialize hand tracking
             console.log('Initializing hand tracking service...');
             handTrackingRef.current = new HandTrackingService();
             await handTrackingRef.current.initialize(
@@ -43,13 +74,16 @@ export function useHandTracking() {
             );
             console.log('Hand tracking service initialized successfully');
 
+            clearTimeout(initTimeout);
             setIsTracking(true);
-        } catch (error) {
-            console.error('Failed to start tracking:', error);
-            // Reset state on failure
+        } catch (err) {
+            console.error('Failed to start tracking:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+            setError(`Failed to start: ${errorMessage}. Please ensure camera access is granted.`);
             stopTracking();
         } finally {
             setIsLoading(false);
+            clearTimeout(initTimeout);
         }
     };
 
@@ -110,6 +144,7 @@ export function useHandTracking() {
         videoRef,
         isTracking,
         isLoading,
+        error,
         fps,
         activeNotes,
         lastResults,
