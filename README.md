@@ -16,11 +16,8 @@
 
 </div>
 
----
 
-## 🎥 Demo
 
-> **Note**: Add a demo GIF or video here after deployment
 
 Experience the magic of playing piano without touching anything! Simply show your hand to your webcam and tap your fingers in the air to create music.
 
