@@ -104,30 +104,36 @@ export function useHandTracking() {
      * Handle MediaPipe results
      */
     const handleResults = (results: Results) => {
-        setLastResults(results);
+        try {
+            setLastResults(results);
 
-        // Update FPS counter
-        const now = Date.now();
-        fpsCounterRef.current.frames++;
-        if (now - fpsCounterRef.current.lastTime >= 1000) {
-            setFps(fpsCounterRef.current.frames);
-            fpsCounterRef.current.frames = 0;
-            fpsCounterRef.current.lastTime = now;
-        }
+            // Update FPS counter
+            const now = Date.now();
+            fpsCounterRef.current.frames++;
+            if (now - fpsCounterRef.current.lastTime >= 1000) {
+                setFps(fpsCounterRef.current.frames);
+                fpsCounterRef.current.frames = 0;
+                fpsCounterRef.current.lastTime = now;
+            }
 
-        // Process gestures if hands detected
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            // Process first hand only for now
-            const landmarks = results.multiHandLandmarks[0];
-            const events = gestureEngineRef.current.processLandmarks(landmarks);
+            // Process gestures if hands detected
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                // Process first hand only for now
+                const landmarks = results.multiHandLandmarks[0];
+                const events = gestureEngineRef.current.processLandmarks(landmarks);
 
-            // Trigger audio for detected gestures
-            events.forEach((event) => {
-                audioEngine.playNote(event.note, '8n', event.velocity);
-            });
+                // Trigger audio for detected gestures
+                events.forEach((event) => {
+                    audioEngine.playNote(event.note, '8n', event.velocity);
+                });
 
-            // Update active notes display
-            setActiveNotes(audioEngine.getActiveNotes());
+                // Update active notes display
+                setActiveNotes(audioEngine.getActiveNotes());
+            }
+        } catch (err) {
+            console.error('Error handling hand tracking results:', err);
+            // Don't set error state here to avoid interrupting the loop, 
+            // but log it for debugging.
         }
     };
 

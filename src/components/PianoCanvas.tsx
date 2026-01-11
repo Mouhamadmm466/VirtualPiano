@@ -38,39 +38,57 @@ export function PianoCanvas({ results, activeNotes }: PianoCanvasProps) {
             return () => window.removeEventListener('resize', resize);
         }
 
-        // Draw hand landmarks
-        for (const landmarks of results.multiHandLandmarks) {
-            // Draw connections (skeleton)
-            drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
-                color: '#00f0ff',
-                lineWidth: 2,
-            });
+        try {
+            // Robust lookup for drawing utilities
+            const drawUtils = (window as any).drawingUtils || { drawConnectors, drawLandmarks };
+            const handsUtils = (window as any).hands || { HAND_CONNECTIONS };
 
-            // Draw landmarks (joints)
-            drawLandmarks(ctx, landmarks, {
-                color: '#b026ff',
-                fillColor: '#ff006e',
-                radius: 3,
-            });
+            const _drawConnectors = drawUtils.drawConnectors || drawConnectors;
+            const _drawLandmarks = drawUtils.drawLandmarks || drawLandmarks;
+            const _HAND_CONNECTIONS = handsUtils.HAND_CONNECTIONS || HAND_CONNECTIONS;
 
-            // Highlight finger tips when active
-            const fingerTipIndices = [4, 8, 12, 16, 20]; // Thumb, Index, Middle, Ring, Pinky
-            fingerTipIndices.forEach((index) => {
-                const landmark = landmarks[index];
-                const x = landmark.x * canvas.width;
-                const y = landmark.y * canvas.height;
+            // Draw hand landmarks
+            for (const landmarks of results.multiHandLandmarks) {
+                // Draw connections (skeleton)
+                if (typeof _drawConnectors === 'function' && _HAND_CONNECTIONS) {
+                    _drawConnectors(ctx, landmarks, _HAND_CONNECTIONS, {
+                        color: '#00f0ff',
+                        lineWidth: 2,
+                    });
+                }
 
-                // Draw glow effect for active fingers
-                ctx.beginPath();
-                ctx.arc(x, y, 15, 0, 2 * Math.PI);
-                ctx.fillStyle = 'rgba(0, 255, 136, 0.3)';
-                ctx.fill();
+                // Draw landmarks (joints)
+                if (typeof _drawLandmarks === 'function') {
+                    _drawLandmarks(ctx, landmarks, {
+                        color: '#b026ff',
+                        fillColor: '#ff006e',
+                        radius: 3,
+                    });
+                }
 
-                ctx.beginPath();
-                ctx.arc(x, y, 8, 0, 2 * Math.PI);
-                ctx.fillStyle = '#00ff88';
-                ctx.fill();
-            });
+                // Highlight finger tips when active
+                const fingerTipIndices = [4, 8, 12, 16, 20]; // Thumb, Index, Middle, Ring, Pinky
+                fingerTipIndices.forEach((index) => {
+                    const landmark = landmarks[index];
+                    if (!landmark) return;
+
+                    const x = landmark.x * canvas.width;
+                    const y = landmark.y * canvas.height;
+
+                    // Draw glow effect for active fingers
+                    ctx.beginPath();
+                    ctx.arc(x, y, 15, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'rgba(0, 255, 136, 0.3)';
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#00ff88';
+                    ctx.fill();
+                });
+            }
+        } catch (err) {
+            console.error('Error drawing on PianoCanvas:', err);
         }
 
         return () => window.removeEventListener('resize', resize);
